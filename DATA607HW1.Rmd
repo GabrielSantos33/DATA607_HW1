@@ -1,0 +1,155 @@
+---
+title: "DATA607HW1"
+author: "Gabriel Santos"
+date: '2022-09-03'
+output: html_document
+---
+### DATA 607 Assignment 1
+## Loading Libraries
+
+```{r}
+library(data.table)
+library(dplyr)
+library(stringr)
+library(readr)
+```
+
+## Read Mushroom Data Set
+
+From the Data Dictionary: This data set includes descriptions of hypothetical samples corresponding to 23 species of gilled mushrooms in the Agaricus and Lepiota Family (pp. 500-525). Each species is identified as definitely edible, definitely poisonous, or of unknown edibility and not recommended. This latter class was combined with the poisonous one. The Guide clearly states that there is no simple rule for determining the edibility of a mushroom; no rule like ``leaflets three, let it be’’ for Poisonous Oak and Ivy.
+
+```{r }
+mushroomURL <- "https://archive.ics.uci.edu/ml/machine-learning-databases/mushroom/agaricus-lepiota.data"
+
+# read in the mushroom data as a csv with no headers and comma separator
+mushroomData <- read.csv(mushroomURL, header = FALSE, sep = ",")
+mushroomData <- as.data.frame(mushroomData)
+```
+
+## let’s take a look at it.
+
+
+```{r }
+ncol(mushroomData)
+```
+
+
+```{r }
+nrow(mushroomData)
+```
+
+```{r }
+head(mushroomData)
+```
+
+```{r }
+dim(mushroomData)
+```
+
+
+```{r }
+table(mushroomData$V1)
+```
+
+ 
+
+```{r }
+unique(mushroomData$V1)
+```
+
+
+## Creation of a vector to store all header information
+
+```{r }
+headers <- c('edib-or-poison', 'cap-shape', 'cap-surface', 'cap-color', 'bruises?', 'odor',
+             'gill-attachment', 'gill-spacing', 'gill-size', 'gill-color', 'stalk-shape',
+             'stalk-root', 'stalk-surface-above-ring', 'stalk-surface-below-ring',
+             'stalk-color-above-ring', 'stalk-color-below-ring', 'veil-type', 'veil-color',
+             'ring-number', 'ring-type', 'spore-print-color', 'population', 'habitat');
+```
+
+
+## Create data frame to hold all relabeling information
+
+
+```{r }
+relabels <- rbind(c('edib-or-poison', "e", "edible"), 
+                  c('edib-or-poison', "p", "poisonous"),
+                  c('odor', "a", "almond"),
+                  c('odor', "l", "anise"),
+                  c('odor', "c", "creosote"),
+                  c('odor', "y", "fishy"),
+                  c('odor', "f", "foul"),
+                  c('odor', "m", "musty"),
+                  c('odor', "n", "none"),
+                  c('odor', "p", "pungent"),
+                  c('odor', "s", "spicy"),
+                  c('cap-color', "n", "brown"),
+                  c('cap-color', "b", "buff"),
+                  c('cap-color', "c", "cinnamon"),
+                  c('cap-color', "g", "gray"),
+                  c('cap-color', "r", "green"),
+                  c('cap-color', "p", "pink"),
+                  c('cap-color', "u", "purple"),
+                  c('cap-color', "e", "red"),
+                  c('cap-color', "w", "white"),
+                  c('cap-color', "y", "yellow"),
+                  c('population', "a", "abundant"),
+                  c('population', "c", "clustered"),
+                  c('population', "n", "numerous"),
+                  c('population', "s", "scattered"),
+                  c('population', "v", "several"),
+                  c('population', "y", "solitary"),
+                  c('habitat', "g", "grasses"),
+                  c('habitat', "l", "leaves"),
+                  c('habitat', "m", "meadows"),
+                  c('habitat', "p", "paths"),
+                  c('habitat', "u", "urban"),
+                  c('habitat', "w", "waste"),
+                  c('habitat', "d", "woods")
+                );
+
+relabels <- data.frame(relabels, stringsAsFactors = FALSE)
+```
+
+
+## Added headers to mushroom data
+
+
+```{r }
+for(i in 1:length(headers)) {
+  names(mushroomData)[i] <- headers[i]
+}
+```
+
+
+## Subset mushroom dataset to include 5 columns,adding population, and habitad.
+
+
+```{r }
+mushroomData <- select(mushroomData, 'edib-or-poison', 'odor', 'cap-color', 'population', 'habitat')
+```
+
+## re-label values in mushroom dataset
+## createtion of a loop to update the data based on its corresponding values.
+
+```{r }
+for(i in 1:length(relabels$X1)){
+  mushroomData[[relabels$X1[i]]] <- replace(mushroomData[[relabels$X1[i]]] , mushroomData[[relabels$X1[i]]] == relabels$X2[i], relabels$X3[i])
+}
+```
+
+
+## Print out final data frame
+
+```{r }
+head(mushroomData)
+```
+
+
+```{r }
+tail(mushroomData)
+```
+
+
+
